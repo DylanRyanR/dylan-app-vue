@@ -1,0 +1,53 @@
+name: NodeJS with Webpack
+
+on:
+  # 手动触发事件
+  workflow_dispatch:
+    inputs:
+      # logLevel:
+      #   description: 'Log level'
+      #   required: true
+      #   default: 'warning'
+      tags:
+        description: 'Docker tags'
+        default: 'latest'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x, 18.x]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Build
+      run: |
+        npm install
+        # npx webpack
+
+     # 构建项目
+    - name: Project Build
+      run: npm run build:prod
+
+    - name: Login to Aliyun Container Registry (ACR)
+      uses: aliyun/acr-login@v1 # 使用阿里云镜像服务action
+      with:
+        login-server: registry.cn-hangzhou.aliyuncs.com # 务必正确填写镜像容器服务的登录地址
+        region-id: cn-hangzhou # 务必正确填写镜像容器服务的登录地址
+        username: ${{ secrets.ALI_REPO }}
+        password: ${{ secrets.ALI_REPO_PWD }}
+    # build image and push to ACR
+    - name: Build and Push Docker Image
+      env:
+        IMAGE_TAG: ${{ github.event.inputs.tags }} # 用于标记容器版本号
+      run: |
+        docker build -t registry.cn-hangzhou.aliyuncs.com/dylan-ryan/dylan-app-vue:$IMAGE_TAG .
+        docker push registry.cn-hangzhou.aliyuncs.com/dylan-ryan/dylan-app-vue:$IMAGE_TAG
