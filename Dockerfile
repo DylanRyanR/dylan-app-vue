@@ -9,7 +9,7 @@ RUN chown nginx.nginx -R /data/log/nginx
 ADD ./dist /data/dist
 ADD nginx_conf/app-vue.conf /etc/nginx/conf.d/default.conf
 # 将 shell copy 到 workdir 目录，此处为 /opt
-COPY ./main.sh /data
+COPY ./nginx_conf/main.sh /data/main.sh
 # workdir
 WORKDIR /data
 
