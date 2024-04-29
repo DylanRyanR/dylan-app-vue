@@ -6,7 +6,7 @@
 # set \$variable3 $PATH;" > /opt/aaa/env.variable; 
 
 # 设置单个环境变量到 environment variable
-echo set \$BACK_HOST $BACK_HOST\; > /etc/nginx/conf.d/env.variable 
+# echo set \$BACK_HOST $BACK_HOST\; > /etc/nginx/conf.d/env.variable 
 # 启动 nginx 应用
 nginx -g "daemon off;"
 # 防止容器启动后进程退出，导致容器退出；实现容器后台运行
