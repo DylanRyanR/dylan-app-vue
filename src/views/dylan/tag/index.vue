@@ -1,26 +1,10 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="琉璃社链接" prop="liuliLink">
+      <el-form-item label="标签名称" prop="name">
         <el-input
-          v-model="queryParams.liuliLink"
-          placeholder="请输入琉璃社链接"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="BT链接" prop="btLink">
-        <el-input
-          v-model="queryParams.btLink"
-          placeholder="请输入BT链接"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="文章标题" prop="liuliTitle">
-        <el-input
-          v-model="queryParams.liuliTitle"
-          placeholder="请输入文章标题"
+          v-model="queryParams.name"
+          placeholder="请输入标签名称"
           clearable
           @keyup.enter="handleQuery"
         />
@@ -69,17 +53,10 @@
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="liuliList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="tagList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="主键id" align="center" prop="id" />
-      <el-table-column label="琉璃社链接" align="center" prop="liuliLink" />
-      <el-table-column label="BT链接" align="center" prop="btLink" />
-      <el-table-column label="文章标题" align="center" prop="liuliTitle" />
-      <el-table-column label="副标题" align="center" prop="subContent" />
-      <el-table-column label="发布日期" align="center" prop="publishTime" />
-      <el-table-column label="发布人" align="center" prop="publishAuthor" />
-      <el-table-column label="类型" align="center" prop="catName" />
-      <el-table-column label="标签" align="center" prop="tagNames" />
+      <el-table-column label="标签名称" align="center" prop="name" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
@@ -96,20 +73,11 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改琉璃-内容对话框 -->
+    <!-- 添加或修改标签对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
-      <el-form ref="liuliRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="琉璃社链接" prop="liuliLink">
-          <el-input v-model="form.liuliLink" placeholder="请输入琉璃社链接" />
-        </el-form-item>
-        <el-form-item label="BT链接" prop="btLink">
-          <el-input v-model="form.btLink" placeholder="请输入BT链接" />
-        </el-form-item>
-        <el-form-item label="文章标题" prop="liuliTitle">
-          <el-input v-model="form.liuliTitle" placeholder="请输入文章标题" />
-        </el-form-item>
-        <el-form-item label="正文">
-          <editor v-model="form.content" :min-height="192"/>
+      <el-form ref="tagRef" :model="form" :rules="rules" label-width="80px">
+        <el-form-item label="标签名称" prop="name">
+          <el-input v-model="form.name" placeholder="请输入标签名称" />
         </el-form-item>
         <el-form-item label="删除标志" prop="delFlag">
           <el-input v-model="form.delFlag" placeholder="请输入删除标志" />
@@ -125,12 +93,12 @@
   </div>
 </template>
 
-<script setup name="Liuli">
-import { listLiuli, getLiuli, delLiuli, addLiuli, updateLiuli } from "@/api/dylan/liuli";
+<script setup name="Tag">
+import { listTag, getTag, delTag, addTag, updateTag } from "@/api/dylan/tag";
 
 const { proxy } = getCurrentInstance();
 
-const liuliList = ref([]);
+const tagList = ref([]);
 const open = ref(false);
 const loading = ref(true);
 const showSearch = ref(true);
@@ -145,10 +113,7 @@ const data = reactive({
   queryParams: {
     pageNum: 1,
     pageSize: 10,
-    liuliLink: null,
-    btLink: null,
-    liuliTitle: null,
-    content: null,
+    name: null,
   },
   rules: {
   }
@@ -156,11 +121,11 @@ const data = reactive({
 
 const { queryParams, form, rules } = toRefs(data);
 
-/** 查询琉璃-内容列表 */
+/** 查询标签列表 */
 function getList() {
   loading.value = true;
-  listLiuli(queryParams.value).then(response => {
-    liuliList.value = response.rows;
+  listTag(queryParams.value).then(response => {
+    tagList.value = response.rows;
     total.value = response.total;
     loading.value = false;
   });
@@ -176,17 +141,14 @@ function cancel() {
 function reset() {
   form.value = {
     id: null,
-    liuliLink: null,
-    btLink: null,
-    liuliTitle: null,
-    content: null,
+    name: null,
     delFlag: null,
     createBy: null,
     createTime: null,
     updateBy: null,
     updateTime: null
   };
-  proxy.resetForm("liuliRef");
+  proxy.resetForm("tagRef");
 }
 
 /** 搜索按钮操作 */
@@ -212,32 +174,32 @@ function handleSelectionChange(selection) {
 function handleAdd() {
   reset();
   open.value = true;
-  title.value = "添加琉璃-内容";
+  title.value = "添加标签";
 }
 
 /** 修改按钮操作 */
 function handleUpdate(row) {
   reset();
   const _id = row.id || ids.value
-  getLiuli(_id).then(response => {
+  getTag(_id).then(response => {
     form.value = response.data;
     open.value = true;
-    title.value = "修改琉璃-内容";
+    title.value = "修改标签";
   });
 }
 
 /** 提交按钮 */
 function submitForm() {
-  proxy.$refs["liuliRef"].validate(valid => {
+  proxy.$refs["tagRef"].validate(valid => {
     if (valid) {
       if (form.value.id != null) {
-        updateLiuli(form.value).then(response => {
+        updateTag(form.value).then(response => {
           proxy.$modal.msgSuccess("修改成功");
           open.value = false;
           getList();
         });
       } else {
-        addLiuli(form.value).then(response => {
+        addTag(form.value).then(response => {
           proxy.$modal.msgSuccess("新增成功");
           open.value = false;
           getList();
@@ -250,8 +212,8 @@ function submitForm() {
 /** 删除按钮操作 */
 function handleDelete(row) {
   const _ids = row.id || ids.value;
-  proxy.$modal.confirm('是否确认删除琉璃-内容编号为"' + _ids + '"的数据项？').then(function() {
-    return delLiuli(_ids);
+  proxy.$modal.confirm('是否确认删除标签编号为"' + _ids + '"的数据项？').then(function() {
+    return delTag(_ids);
   }).then(() => {
     getList();
     proxy.$modal.msgSuccess("删除成功");
@@ -260,9 +222,9 @@ function handleDelete(row) {
 
 /** 导出按钮操作 */
 function handleExport() {
-  proxy.download('dylan/liuli/export', {
+  proxy.download('dylan/tag/export', {
     ...queryParams.value
-  }, `liuli_${new Date().getTime()}.xlsx`)
+  }, `tag_${new Date().getTime()}.xlsx`)
 }
 
 getList();
