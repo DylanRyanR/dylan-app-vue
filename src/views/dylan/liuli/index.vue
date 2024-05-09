@@ -17,10 +17,10 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="文章标题" prop="liuliTitle">
+      <el-form-item label="文章内容" prop="liuliTitle">
         <el-input
           v-model="queryParams.liuliTitle"
-          placeholder="请输入文章标题"
+          placeholder="请输入文章内容"
           clearable
           @keyup.enter="handleQuery"
         />
@@ -72,9 +72,15 @@
     <el-table v-loading="loading" :data="liuliList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="主键id" align="center" prop="id" />
-      <el-table-column label="琉璃社链接" align="center" prop="liuliLink" />
+      <!-- <el-table-column label="琉璃社链接" align="center" prop="liuliLink" /> -->
       <el-table-column label="BT链接" align="center" prop="btLink" />
-      <el-table-column label="文章标题" align="center" prop="liuliTitle" />
+      <el-table-column label="文章标题" align="center" >
+        <template #default="scope">  
+          <a :href="scope.row.liuliLink" target="_blank" style="text-decoration: underline; color: #007bff;">  
+            {{ scope.row.liuliTitle }}  
+          </a>  
+        </template>
+      </el-table-column>
       <el-table-column label="副标题" align="center" prop="subContent" />
       <el-table-column label="发布日期" align="center" prop="publishTime" />
       <el-table-column label="发布人" align="center" prop="publishAuthor" />
