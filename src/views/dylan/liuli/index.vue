@@ -86,6 +86,12 @@
       <el-table-column label="发布人" align="center" prop="publishAuthor" />
       <el-table-column label="类型" align="center" prop="catName" />
       <el-table-column label="标签" align="center" prop="tagNames" />
+      <el-table-column label="图片" width="150px">
+          <template #default="scope">
+              <el-image :src="scope.row.imgUrl" style="width:100px ;"></el-image>
+              <!-- <div style="text-align: center;width: 100px;">美景</div> -->
+          </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
