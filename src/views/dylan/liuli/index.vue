@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="120px">
       <el-form-item label="琉璃社链接" prop="liuliLink">
         <el-input
           v-model="queryParams.liuliLink"
@@ -25,6 +25,28 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
+      <el-form-item label="类型" prop="liuliType">
+        <el-select v-model="queryParams.liuliType" multiple placeholder="请选择类型" clearable>
+          <el-option v-for="type in types" :key="type.id" :label="type.name" :value="type.id"/>
+        </el-select>
+      </el-form-item>
+
+      <el-form-item label="标签" prop="liuliTag">
+        <el-select
+          v-model="queryParams.liuliTag"
+          multiple
+          placeholder="请选择标签"
+          clearable
+        >
+          <el-option
+            v-for="tag in tags"
+              :key="tag.id"
+              :label="tag.name"
+              :value="tag.id"
+          />
+        </el-select>
+      </el-form-item>
+
       <el-form-item>
         <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
         <el-button icon="Refresh" @click="resetQuery">重置</el-button>
@@ -69,11 +91,21 @@
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="liuliList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="liuliList" @selection-change="handleSelectionChange" >
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="主键id" align="center" prop="id" />
       <!-- <el-table-column label="琉璃社链接" align="center" prop="liuliLink" /> -->
       <el-table-column label="BT链接" align="center" prop="btLink" />
+        <!-- <template #default="{ row }">
+            <el-link :underline="false">
+                      {{ row.btLink }}
+            </el-link>
+            <i v-if="row.btLink"
+                style="margin-left: 4px; cursor: pointer"
+                class="el-icon-document-copy"
+                @click="clickCopy(row.btLink)"></i>
+        </template>
+      </el-table-column> -->
       <el-table-column label="文章标题" align="center" >
         <template #default="scope">  
           <a :href="scope.row.liuliLink" target="_blank" style="text-decoration: underline; color: #007bff;">  
@@ -138,7 +170,7 @@
 </template>
 
 <script setup name="Liuli">
-import { listLiuli, getLiuli, delLiuli, addLiuli, updateLiuli } from "@/api/dylan/liuli";
+import { listLiuli, getLiuli, delLiuli, addLiuli, updateLiuli, getCatList, getTagList } from "@/api/dylan/liuli";
 
 const { proxy } = getCurrentInstance();
 
@@ -151,6 +183,8 @@ const single = ref(true);
 const multiple = ref(true);
 const total = ref(0);
 const title = ref("");
+const types = ref([]);
+const tags = ref([]);
 
 const data = reactive({
   form: {},
@@ -161,6 +195,8 @@ const data = reactive({
     btLink: null,
     liuliTitle: null,
     content: null,
+    liuliType: null,
+    liuliTag: null,
   },
   rules: {
   }
@@ -204,7 +240,12 @@ function reset() {
 /** 搜索按钮操作 */
 function handleQuery() {
   queryParams.value.pageNum = 1;
+  // 将选中的类型id拼接成字符串
+  queryParams.value.liuliCatIds = queryParams.value.liuliType.join(',');
+  queryParams.value.liuliTagIds = queryParams.value.liuliTag.join(',');
   getList();
+  handleCatList();
+  handleTagList();
 }
 
 /** 重置按钮操作 */
@@ -277,5 +318,26 @@ function handleExport() {
   }, `liuli_${new Date().getTime()}.xlsx`)
 }
 
+function handleCatList() {
+  loading.value = true;
+  // 调用接口获取类型数据
+  getCatList().then(response => {
+    types.value = response.data;
+  }).catch(error => {
+    console.log(error);
+  });
+}
+
+function handleTagList(){
+  loading.value = true
+  getTagList().then(response => {
+    tags.value = response.data;
+  }).catch(error => {
+    console.log(error);
+  });
+}
+
 getList();
+handleCatList();
+handleTagList();
 </script>

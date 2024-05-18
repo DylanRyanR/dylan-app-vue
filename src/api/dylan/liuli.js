@@ -42,3 +42,17 @@ export function delLiuli(id) {
     method: 'delete'
   })
 }
+
+export function getCatList() {
+  return request({
+    url: '/dylan/cat/boxList',
+    method: 'get'
+  })
+}
+
+export function getTagList() {
+  return request({
+    url: '/dylan/tag/getBoxList',
+    method: 'get'
+  })
+}
