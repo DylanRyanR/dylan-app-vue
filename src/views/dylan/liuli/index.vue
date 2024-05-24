@@ -165,6 +165,7 @@
 
 <script setup name="Liuli">
 import { listLiuli, getLiuli, delLiuli, addLiuli, updateLiuli, getCatList, getTagList } from "@/api/dylan/liuli";
+import { el } from "element-plus/es/locales.mjs";
 
 const { proxy } = getCurrentInstance();
 
@@ -332,17 +333,27 @@ function handleTagList(){
 }
 
 function copyToClipboard(text) {
-  navigator.clipboard.writeText(text).then(() => {
-    // this.$message({
-    //   message: '链接已成功复制到剪贴板',
-    //   type: 'success'
-    // });
-    proxy.$modal.msgSuccess("复制成功");
-  }).catch(() => {
-    proxy.$modal.msgSuccess("复制失败");
-    // this.$message.error('复制链接失败');
-  });
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      proxy.$modal.msgSuccess("复制成功");
+    }).catch(() => {
+      fallbackCopyTextToClipboard(text);
+    });
+  }else {
+    fallbackCopyTextToClipboard(text);
+  }
 }
+
+function fallbackCopyTextToClipboard(text) {
+  var textArea = document.createElement("textarea");
+  textArea.value = text;
+  document.body.appendChild(textArea);
+  textArea.select();
+  document.execCommand("copy");
+  document.body.removeChild(textArea);
+  proxy.$modal.msgSuccess("复制成功");
+}
+
 
 getList();
 handleCatList();
