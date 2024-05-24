@@ -95,17 +95,11 @@
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="主键id" align="center" prop="id" />
       <!-- <el-table-column label="琉璃社链接" align="center" prop="liuliLink" /> -->
-      <el-table-column label="BT链接" align="center" prop="btLink" />
-        <!-- <template #default="{ row }">
-            <el-link :underline="false">
-                      {{ row.btLink }}
-            </el-link>
-            <i v-if="row.btLink"
-                style="margin-left: 4px; cursor: pointer"
-                class="el-icon-document-copy"
-                @click="clickCopy(row.btLink)"></i>
+      <el-table-column label="BT链接" align="center" prop="btLink" >
+        <template #default="scope">
+          <span @click="copyToClipboard(scope.row.btLink)" style="cursor: pointer; color: #007bff; text-decoration: underline;">{{ scope.row.btLink }}</span>
         </template>
-      </el-table-column> -->
+      </el-table-column>
       <el-table-column label="文章标题" align="center" >
         <template #default="scope">  
           <a :href="scope.row.liuliLink" target="_blank" style="text-decoration: underline; color: #007bff;">  
@@ -334,6 +328,19 @@ function handleTagList(){
     tags.value = response.data;
   }).catch(error => {
     console.log(error);
+  });
+}
+
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    // this.$message({
+    //   message: '链接已成功复制到剪贴板',
+    //   type: 'success'
+    // });
+    proxy.$modal.msgSuccess("复制成功");
+  }).catch(() => {
+    proxy.$modal.msgSuccess("复制失败");
+    // this.$message.error('复制链接失败');
   });
 }
 
