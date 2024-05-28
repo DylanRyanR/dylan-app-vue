@@ -114,7 +114,7 @@
       <el-table-column label="标签" align="center" prop="tagNames" />
       <el-table-column label="图片" width="150px">
           <template #default="scope">
-              <el-image :src="scope.row.imgUrl" style="width:100px ;"></el-image>
+              <el-image :src="scope.row.imgUrl" style="width:100px ;" @click="showImagePreview(scope.row.imgUrl)"></el-image>
               <!-- <div style="text-align: center;width: 100px;">美景</div> -->
           </template>
       </el-table-column>
@@ -135,7 +135,7 @@
     />
 
     <!-- 添加或修改琉璃-内容对话框 -->
-    <el-dialog :title="title" v-model="open" width="500px" append-to-body>
+    <el-dialog :title="title" v-model="open" width="1200px" append-to-body>
       <el-form ref="liuliRef" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="琉璃社链接" prop="liuliLink">
           <el-input v-model="form.liuliLink" placeholder="请输入琉璃社链接" />
@@ -180,6 +180,8 @@ const total = ref(0);
 const title = ref("");
 const types = ref([]);
 const tags = ref([]);
+const dialogVisible = ref(false);
+const lightboxImages = ref([]);
 
 const data = reactive({
   form: {},
@@ -194,7 +196,7 @@ const data = reactive({
     liuliTag: null,
   },
   rules: {
-  }
+  },
 });
 
 const { queryParams, form, rules } = toRefs(data);
@@ -207,6 +209,11 @@ function getList() {
     total.value = response.total;
     loading.value = false;
   });
+}
+
+function showImagePreview(imgUrl) {
+  lightboxImages.value = [imgUrl];
+  dialogVisible.value = true;
 }
 
 // 取消按钮
