@@ -101,13 +101,37 @@
         </template>
       </el-table-column>
       <el-table-column label="文章标题" align="center" >
-        <template #default="scope">  
-          <a :href="scope.row.liuliLink" target="_blank" style="text-decoration: underline; color: #007bff;">  
-            {{ scope.row.liuliTitle }}  
-          </a>  
+        <template #default="scope">
+          <el-tooltip
+            :content="scope.row.liuliTitle"
+            placement="top"
+            :disabled="!scope.row.liuliTitle || scope.row.liuliTitle.length <= 20"
+            effect="dark"
+            :popper-class="'custom-tooltip'"
+          >
+            <div class="ellipsis">
+              <a :href="scope.row.liuliLink" target="_blank" style="text-decoration: underline; color: #007bff;">
+                {{ scope.row.liuliTitle }}
+              </a>
+            </div>
+          </el-tooltip>
         </template>
       </el-table-column>
-      <el-table-column label="副标题" align="center" prop="subContent" />
+      <el-table-column label="副标题" align="center" prop="subContent" >
+        <template #default="scope">
+          <el-tooltip
+            :content="scope.row.subContent"
+            placement="top"
+            :disabled="!scope.row.subContent || scope.row.subContent.length <= 20"
+            effect="dark"
+            :popper-class="'custom-tooltip'"
+          >
+            <div class="ellipsis">
+              {{ scope.row.subContent }}
+            </div>
+          </el-tooltip>
+        </template>
+      </el-table-column>
       <el-table-column label="发布日期" align="center" prop="publishTime" />
       <el-table-column label="发布人" align="center" prop="publishAuthor" />
       <el-table-column label="类型" align="center" prop="catName" />
@@ -125,6 +149,8 @@
         </template>
       </el-table-column>
     </el-table>
+
+    
     
     <pagination
       v-show="total>0"
@@ -366,3 +392,57 @@ getList();
 handleCatList();
 handleTagList();
 </script>
+
+<style scoped>
+.app-container {
+  padding: 20px;
+}
+
+.ellipsis {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3; /* 设置最多显示的行数 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  cursor: pointer;
+}
+
+.el-table {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.el-table th {
+  background-color: #f5f7fa;
+  color: #909399;
+  font-weight: bold;
+  text-align: center;
+}
+
+.el-table td {
+  text-align: center;
+}
+
+.el-table .ellipsis a {
+  color: #007bff;
+  text-decoration: underline;
+}
+
+.el-table .el-image {
+  cursor: pointer;
+}
+
+.el-form-item {
+  margin-bottom: 15px;
+}
+
+.el-button {
+  margin-right: 10px;
+}
+
+.dialog-footer {
+  text-align: right;
+}
+
+</style>
