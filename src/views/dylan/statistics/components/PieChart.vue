@@ -1,5 +1,5 @@
 <template>
-  <div :class="className" :style="{height:height,width:width}" />
+  <div :class="className" :style="{ height, width }" />
 </template>
 
 <script>
@@ -19,7 +19,7 @@ export default {
     },
     height: {
       type: String,
-      default: '350px'
+      default: '360px'
     },
     chartData: {
       type: Object,
@@ -56,35 +56,47 @@ export default {
       this.chart = echarts.init(this.$el)
       this.setOptions(this.chartData)
     },
-    setOptions({ seriesData, title } = {}) {
+    setOptions({ seriesData } = {}) {
       this.chart.setOption({
-        title: {
-          text: title,
-          left: 'center'
-        },
+        color: ['#f59e0b', '#60a5fa', '#34d399', '#f87171', '#a78bfa', '#22d3ee'],
         tooltip: {
           trigger: 'item',
-          formatter: '{a} <br/>{b} : {c} ({d}%)'
+          formatter: '{b}：{c} ({d}%)',
+          backgroundColor: 'rgba(17, 24, 39, 0.92)',
+          borderWidth: 0,
+          textStyle: {
+            color: '#fff'
+          }
         },
         legend: {
           orient: 'vertical',
-          left: 'left',
-          data: seriesData.map(item => item.name)
+          right: 0,
+          top: 'center',
+          itemWidth: 10,
+          itemHeight: 10,
+          textStyle: {
+            color: '#667085'
+          }
         },
         series: [
           {
             name: '分类占比',
             type: 'pie',
-            radius: '55%',
-            center: ['50%', '60%'],
-            data: seriesData,
+            radius: ['48%', '72%'],
+            center: ['35%', '52%'],
+            avoidLabelOverlap: true,
+            label: {
+              show: false
+            },
             emphasis: {
+              scale: true,
               itemStyle: {
-                shadowBlur: 10,
+                shadowBlur: 16,
                 shadowOffsetX: 0,
-                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                shadowColor: 'rgba(15, 23, 42, 0.16)'
               }
-            }
+            },
+            data: seriesData
           }
         ]
       })

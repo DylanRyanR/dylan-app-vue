@@ -1,5 +1,5 @@
 <template>
-  <div :class="className" :style="{height:height,width:width}" />
+  <div :class="className" :style="{ height, width }" />
 </template>
 
 <script>
@@ -19,7 +19,7 @@ export default {
     },
     height: {
       type: String,
-      default: '350px'
+      default: '360px'
     },
     autoResize: {
       type: Boolean,
@@ -60,59 +60,81 @@ export default {
       this.chart = echarts.init(this.$el)
       this.setOptions(this.chartData)
     },
-    setOptions({ xAxisData, seriesData, title } = {}) {
+    setOptions({ xAxisData, seriesData } = {}) {
       this.chart.setOption({
-        title: {
-          text: title,
-          left: 'center',
-          top: 10,
-          textStyle: {
-            fontSize: 14
-          }
-        },
-        xAxis: {
-          data: xAxisData,
-          boundaryGap: false,
-          axisTick: {
-            show: false
-          }
-        },
+        color: ['#3b82f6'],
         grid: {
-          left: 10,
-          right: 10,
-          bottom: 20,
-          top: 60,
+          left: 18,
+          right: 18,
+          bottom: 18,
+          top: 28,
           containLabel: true
         },
         tooltip: {
           trigger: 'axis',
           axisPointer: {
-            type: 'cross'
+            type: 'line'
           },
-          padding: [5, 10]
-        },
-        yAxis: {
-          axisTick: {
-            show: false
+          padding: [8, 12],
+          backgroundColor: 'rgba(17, 24, 39, 0.92)',
+          borderWidth: 0,
+          textStyle: {
+            color: '#fff'
           }
         },
-        legend: {
-          data: ['新增数量']
+        xAxis: {
+          type: 'category',
+          data: xAxisData,
+          boundaryGap: false,
+          axisTick: {
+            show: false
+          },
+          axisLine: {
+            lineStyle: {
+              color: '#d9e2f2'
+            }
+          },
+          axisLabel: {
+            color: '#7b8794'
+          }
+        },
+        yAxis: {
+          type: 'value',
+          axisTick: {
+            show: false
+          },
+          axisLine: {
+            show: false
+          },
+          axisLabel: {
+            color: '#7b8794'
+          },
+          splitLine: {
+            lineStyle: {
+              color: '#edf2f7'
+            }
+          }
         },
         series: [{
           name: '新增数量',
-          itemStyle: {
-            color: '#FF005A',
-            lineStyle: {
-              color: '#FF005A',
-              width: 2
-            }
-          },
           smooth: true,
           type: 'line',
           data: seriesData,
-          animationDuration: 2800,
-          animationEasing: 'cubicInOut'
+          showSymbol: false,
+          symbolSize: 8,
+          lineStyle: {
+            width: 3,
+            color: '#3b82f6'
+          },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: 'rgba(59, 130, 246, 0.28)' },
+              { offset: 1, color: 'rgba(59, 130, 246, 0.04)' }
+            ])
+          },
+          emphasis: {
+            focus: 'series'
+          }
         }]
       })
     }
