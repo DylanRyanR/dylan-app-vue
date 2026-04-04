@@ -5,7 +5,27 @@
         <div class="page-hero__eyebrow">Dylan · Statistics</div>
         <div class="page-hero__title-row">
           <h2 class="page-hero__title">琉璃数据看板</h2>
-          <el-tag type="info" effect="plain" round>近30天</el-tag>
+          <el-tag type="info" effect="plain" round>{{ rangeLabel }}</el-tag>
+        </div>
+        <div class="page-hero__actions">
+          <el-radio-group v-model="rangeType" size="small" @change="handleRangeChange">
+            <el-radio-button label="7d">近7天</el-radio-button>
+            <el-radio-button label="30d">近30天</el-radio-button>
+            <el-radio-button label="90d">近90天</el-radio-button>
+            <el-radio-button label="month">本月</el-radio-button>
+            <el-radio-button label="custom">自定义</el-radio-button>
+          </el-radio-group>
+          <el-date-picker
+            v-if="rangeType === 'custom'"
+            v-model="dateRange"
+            type="daterange"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            value-format="YYYY-MM-DD"
+            size="small"
+            @change="handleRangeChange"
+          />
         </div>
         <p class="page-hero__desc">聚合内容、分类、标签和作者四个维度，快速查看当前数据分布与变化趋势。</p>
       </div>
@@ -53,7 +73,10 @@
             <div class="metric-card__value">
               <count-to :start-val="0" :end-val="kpiData.liuliCount" :duration="2600" />
             </div>
-            <div class="metric-card__footer">当前系统内累计有效内容</div>
+            <div class="metric-card__footer">
+              当前系统内累计有效内容
+              <span v-if="kpiData.periodNewCount"> · 本周期新增 {{ kpiData.periodNewCount }}</span>
+            </div>
           </template>
         </div>
       </el-col>
@@ -61,7 +84,7 @@
       <el-col :xs="24" :sm="12" :lg="6" class="card-panel-col">
         <div class="metric-card metric-card--red" :class="{ 'is-loading': loading.kpi }">
           <div class="metric-card__top">
-            <span class="metric-card__label">今日新增</span>
+            <span class="metric-card__label">本周期新增</span>
             <div class="metric-card__icon">
               <svg-icon icon-class="edit" class-name="metric-card__icon-svg" />
             </div>
@@ -78,9 +101,11 @@
           </template>
           <template v-else>
             <div class="metric-card__value">
-              <count-to :start-val="0" :end-val="kpiData.todayLiuliCount" :duration="3000" />
+              <count-to :start-val="0" :end-val="kpiData.periodNewCount" :duration="3000" />
             </div>
-            <div class="metric-card__footer">按当天新增记录统计</div>
+            <div class="metric-card__footer">
+              较上周期 {{ formatRate(kpiData.growthRate) }} · 日均 {{ formatAverage(kpiData.dailyAverage) }}
+            </div>
           </template>
         </div>
       </el-col>
@@ -107,7 +132,9 @@
             <div class="metric-card__value">
               <count-to :start-val="0" :end-val="kpiData.tagCount" :duration="3200" />
             </div>
-            <div class="metric-card__footer">当前可用标签维度数量</div>
+            <div class="metric-card__footer">
+              标签规模：{{ formatCount(kpiData.tagCount) }} 个
+            </div>
           </template>
         </div>
       </el-col>
@@ -134,7 +161,9 @@
             <div class="metric-card__value">
               <count-to :start-val="0" :end-val="kpiData.categoryCount" :duration="3600" />
             </div>
-            <div class="metric-card__footer">用于内容归类的分类项</div>
+            <div class="metric-card__footer">
+              分类规模：{{ formatCount(kpiData.categoryCount) }} 个
+            </div>
           </template>
         </div>
       </el-col>
@@ -146,9 +175,31 @@
           <div class="chart-panel__header">
             <div>
               <div class="chart-panel__title">内容新增趋势</div>
-              <div class="chart-panel__sub">观察近30天新增内容变化，识别峰值和活跃时段</div>
+              <div class="chart-panel__sub">观察当前周期新增变化，识别峰值和活跃时段</div>
             </div>
             <el-tag type="danger" effect="light" round>趋势</el-tag>
+          </div>
+          <div class="trend-summary">
+            <div class="trend-summary__item">
+              <div class="trend-summary__label">累计新增</div>
+              <div class="trend-summary__value">{{ formatCount(trendSummary.total) }}</div>
+            </div>
+            <div class="trend-summary__item">
+              <div class="trend-summary__label">日均新增</div>
+              <div class="trend-summary__value">{{ formatAverage(trendSummary.average) }}</div>
+            </div>
+            <div class="trend-summary__item">
+              <div class="trend-summary__label">峰值</div>
+              <div class="trend-summary__value">
+                {{ trendSummary.peakValue }}<span v-if="trendSummary.peakLabel"> / {{ trendSummary.peakLabel }}</span>
+              </div>
+            </div>
+            <div class="trend-summary__item">
+              <div class="trend-summary__label">低谷</div>
+              <div class="trend-summary__value">
+                {{ trendSummary.lowValue }}<span v-if="trendSummary.lowLabel"> / {{ trendSummary.lowLabel }}</span>
+              </div>
+            </div>
           </div>
           <div v-loading="loading.trend" class="chart-panel__body">
             <line-chart v-if="hasTrendData" :chart-data="liuliTrendData" />
@@ -245,7 +296,10 @@ export default {
         liuliCount: 0,
         todayLiuliCount: 0,
         tagCount: 0,
-        categoryCount: 0
+        categoryCount: 0,
+        periodNewCount: 0,
+        growthRate: 0,
+        dailyAverage: 0
       },
       liuliTrendData: {
         xAxisData: [],
@@ -262,6 +316,17 @@ export default {
         xAxisData: [],
         seriesData: []
       },
+      trendSummary: {
+        total: 0,
+        average: 0,
+        peakLabel: '',
+        peakValue: 0,
+        lowLabel: '',
+        lowValue: 0
+      },
+      rangeType: '30d',
+      dateRange: [],
+      rangeLabel: '近30天',
       loading: {
         kpi: false,
         trend: false,
@@ -287,9 +352,49 @@ export default {
     }
   },
   created() {
+    this.rangeLabel = this.getRangeLabel()
     this.reloadAll()
   },
   methods: {
+    buildRangeParams() {
+      const params = {
+        rangeType: this.rangeType
+      }
+      if (this.rangeType === 'custom' && this.dateRange && this.dateRange.length === 2) {
+        params.beginDate = this.dateRange[0]
+        params.endDate = this.dateRange[1]
+      }
+      return params
+    },
+    handleRangeChange() {
+      this.rangeLabel = this.getRangeLabel()
+      if (this.rangeType === 'custom' && (!this.dateRange || this.dateRange.length !== 2)) {
+        return
+      }
+      this.reloadAll()
+    },
+    getRangeLabel() {
+      const labelMap = {
+        '7d': '近7天',
+        '30d': '近30天',
+        '90d': '近90天',
+        month: '本月',
+        custom: this.dateRange && this.dateRange.length === 2 ? `${this.dateRange[0]} 至 ${this.dateRange[1]}` : '自定义'
+      }
+      return labelMap[this.rangeType] || '近30天'
+    },
+    formatRate(value) {
+      if (value === null || value === undefined) return '0%'
+      return `${Number(value).toFixed(2)}%`
+    },
+    formatAverage(value) {
+      if (value === null || value === undefined) return '0'
+      return Number(value).toFixed(2)
+    },
+    formatCount(value) {
+      if (value === null || value === undefined) return 0
+      return value
+    },
     reloadAll() {
       this.pageError = false
       this.fetchKpiData()
@@ -303,12 +408,15 @@ export default {
     },
     fetchKpiData() {
       this.loading.kpi = true
-      getKpiData().then(response => {
+      getKpiData(this.buildRangeParams()).then(response => {
         this.kpiData = response.data || {
           liuliCount: 0,
           todayLiuliCount: 0,
           tagCount: 0,
-          categoryCount: 0
+          categoryCount: 0,
+          periodNewCount: 0,
+          growthRate: 0,
+          dailyAverage: 0
         }
       }).catch(() => {
         this.handleRequestError()
@@ -318,16 +426,33 @@ export default {
     },
     fetchLiuliTrend() {
       this.loading.trend = true
-      getLiuliTrend().then(response => {
-        const data = response.data || []
+      getLiuliTrend(this.buildRangeParams()).then(response => {
+        const data = response.data || {}
+        const series = data.series || []
         this.liuliTrendData = {
-          xAxisData: data.map(item => item.name),
-          seriesData: data.map(item => item.value)
+          xAxisData: series.map(item => item.name),
+          seriesData: series.map(item => item.value)
+        }
+        this.trendSummary = data.summary || {
+          total: 0,
+          average: 0,
+          peakLabel: '',
+          peakValue: 0,
+          lowLabel: '',
+          lowValue: 0
         }
       }).catch(() => {
         this.liuliTrendData = {
           xAxisData: [],
           seriesData: []
+        }
+        this.trendSummary = {
+          total: 0,
+          average: 0,
+          peakLabel: '',
+          peakValue: 0,
+          lowLabel: '',
+          lowValue: 0
         }
         this.handleRequestError()
       }).finally(() => {
@@ -336,7 +461,7 @@ export default {
     },
     fetchCategoryDistribution() {
       this.loading.category = true
-      getCategoryDistribution().then(response => {
+      getCategoryDistribution(this.buildRangeParams()).then(response => {
         this.categoryDistributionData = {
           seriesData: response.data || []
         }
@@ -351,7 +476,7 @@ export default {
     },
     fetchTagRanking() {
       this.loading.tag = true
-      getTagRanking().then(response => {
+      getTagRanking(this.buildRangeParams()).then(response => {
         const data = response.data || []
         this.tagRankingData = {
           xAxisData: data.map(item => item.name).reverse(),
@@ -369,7 +494,7 @@ export default {
     },
     fetchAuthorRanking() {
       this.loading.author = true
-      getAuthorRanking().then(response => {
+      getAuthorRanking(this.buildRangeParams()).then(response => {
         const data = response.data || []
         this.authorRankingData = {
           xAxisData: data.map(item => item.name),
@@ -441,6 +566,86 @@ export default {
   font-size: 14px;
   line-height: 1.7;
   color: rgba(255, 255, 255, 0.88);
+}
+
+.page-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.page-hero__actions :deep(.el-radio-group) {
+  background: rgba(255, 255, 255, 0.16);
+  padding: 4px;
+  border-radius: 12px;
+}
+
+.page-hero__actions :deep(.el-radio-button__inner) {
+  border: none;
+  color: rgba(255, 255, 255, 0.88);
+  background: transparent;
+}
+
+.page-hero__actions :deep(.el-radio-button__inner:hover) {
+  color: #fff;
+}
+
+.page-hero__actions :deep(.el-radio-button__orig-radio:checked + .el-radio-button__inner) {
+  background: #fff;
+  color: #1f5eff;
+  border-radius: 10px;
+  box-shadow: 0 6px 12px rgba(15, 23, 42, 0.12);
+}
+
+.page-hero__actions :deep(.el-date-editor) {
+  background: rgba(255, 255, 255, 0.16);
+  border: none;
+  color: #fff;
+}
+
+.page-hero__actions :deep(.el-input__inner) {
+  background: transparent;
+  color: #fff;
+}
+
+.page-hero__actions :deep(.el-input__suffix) {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.page-hero__actions :deep(.el-input__prefix) {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.trend-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.trend-summary__item {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #f7f9ff;
+  border: 1px solid rgba(64, 99, 255, 0.12);
+}
+
+.trend-summary__label {
+  font-size: 12px;
+  color: #8a94a6;
+  margin-bottom: 6px;
+}
+
+.trend-summary__value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.metric-card__footer span {
+  color: #3b82f6;
 }
 
 .page-hero__meta {
@@ -694,6 +899,10 @@ export default {
 
   .page-hero__meta {
     min-width: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .trend-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

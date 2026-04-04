@@ -1,41 +1,46 @@
 import request from '@/utils/request'
 
 // 查询核心KPI指标
-export function getKpiData() {
+export function getKpiData(params) {
   return request({
     url: '/dylan/statistics/kpi',
-    method: 'get'
+    method: 'get',
+    params
   })
 }
 
 // 查询内容新增趋势
-export function getLiuliTrend() {
+export function getLiuliTrend(params) {
   return request({
     url: '/dylan/statistics/liuli-trend',
-    method: 'get'
+    method: 'get',
+    params
   })
 }
 
 // 查询分类分布
-export function getCategoryDistribution() {
+export function getCategoryDistribution(params) {
   return request({
     url: '/dylan/statistics/category-distribution',
-    method: 'get'
+    method: 'get',
+    params
   })
 }
 
 // 查询标签排行
-export function getTagRanking() {
+export function getTagRanking(params) {
   return request({
     url: '/dylan/statistics/tag-ranking',
-    method: 'get'
+    method: 'get',
+    params
   })
 }
 
 // 查询作者发布排行
-export function getAuthorRanking() {
+export function getAuthorRanking(params) {
   return request({
     url: '/dylan/statistics/author-ranking',
-    method: 'get'
+    method: 'get',
+    params
   })
 }
