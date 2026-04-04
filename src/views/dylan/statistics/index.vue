@@ -21,64 +21,121 @@
       </div>
     </div>
 
+    <div v-if="pageError" class="page-status page-status--error">
+      <div class="page-status__icon">!</div>
+      <div class="page-status__content">
+        <div class="page-status__title">统计数据加载失败</div>
+        <div class="page-status__desc">接口请求未成功完成，请重试后重新查看看板数据。</div>
+      </div>
+      <el-button type="primary" @click="reloadAll">重新加载</el-button>
+    </div>
+
     <el-row :gutter="20" class="panel-group">
       <el-col :xs="24" :sm="12" :lg="6" class="card-panel-col">
-        <div class="metric-card metric-card--blue">
+        <div class="metric-card metric-card--blue" :class="{ 'is-loading': loading.kpi }">
           <div class="metric-card__top">
             <span class="metric-card__label">内容总数</span>
             <div class="metric-card__icon">
               <svg-icon icon-class="documentation" class-name="metric-card__icon-svg" />
             </div>
           </div>
-          <div class="metric-card__value">
-            <count-to :start-val="0" :end-val="kpiData.liuliCount" :duration="2600" />
-          </div>
-          <div class="metric-card__footer">当前系统内累计有效内容</div>
+          <template v-if="loading.kpi">
+            <el-skeleton animated>
+              <template #template>
+                <div class="metric-card__skeleton">
+                  <el-skeleton-item variant="text" style="width: 68%; height: 36px; margin-bottom: 12px;" />
+                  <el-skeleton-item variant="text" style="width: 82%; height: 16px;" />
+                </div>
+              </template>
+            </el-skeleton>
+          </template>
+          <template v-else>
+            <div class="metric-card__value">
+              <count-to :start-val="0" :end-val="kpiData.liuliCount" :duration="2600" />
+            </div>
+            <div class="metric-card__footer">当前系统内累计有效内容</div>
+          </template>
         </div>
       </el-col>
 
       <el-col :xs="24" :sm="12" :lg="6" class="card-panel-col">
-        <div class="metric-card metric-card--red">
+        <div class="metric-card metric-card--red" :class="{ 'is-loading': loading.kpi }">
           <div class="metric-card__top">
             <span class="metric-card__label">今日新增</span>
             <div class="metric-card__icon">
               <svg-icon icon-class="edit" class-name="metric-card__icon-svg" />
             </div>
           </div>
-          <div class="metric-card__value">
-            <count-to :start-val="0" :end-val="kpiData.todayLiuliCount" :duration="3000" />
-          </div>
-          <div class="metric-card__footer">按当天新增记录统计</div>
+          <template v-if="loading.kpi">
+            <el-skeleton animated>
+              <template #template>
+                <div class="metric-card__skeleton">
+                  <el-skeleton-item variant="text" style="width: 68%; height: 36px; margin-bottom: 12px;" />
+                  <el-skeleton-item variant="text" style="width: 82%; height: 16px;" />
+                </div>
+              </template>
+            </el-skeleton>
+          </template>
+          <template v-else>
+            <div class="metric-card__value">
+              <count-to :start-val="0" :end-val="kpiData.todayLiuliCount" :duration="3000" />
+            </div>
+            <div class="metric-card__footer">按当天新增记录统计</div>
+          </template>
         </div>
       </el-col>
 
       <el-col :xs="24" :sm="12" :lg="6" class="card-panel-col">
-        <div class="metric-card metric-card--green">
+        <div class="metric-card metric-card--green" :class="{ 'is-loading': loading.kpi }">
           <div class="metric-card__top">
             <span class="metric-card__label">标签总数</span>
             <div class="metric-card__icon">
               <svg-icon icon-class="component" class-name="metric-card__icon-svg" />
             </div>
           </div>
-          <div class="metric-card__value">
-            <count-to :start-val="0" :end-val="kpiData.tagCount" :duration="3200" />
-          </div>
-          <div class="metric-card__footer">当前可用标签维度数量</div>
+          <template v-if="loading.kpi">
+            <el-skeleton animated>
+              <template #template>
+                <div class="metric-card__skeleton">
+                  <el-skeleton-item variant="text" style="width: 68%; height: 36px; margin-bottom: 12px;" />
+                  <el-skeleton-item variant="text" style="width: 82%; height: 16px;" />
+                </div>
+              </template>
+            </el-skeleton>
+          </template>
+          <template v-else>
+            <div class="metric-card__value">
+              <count-to :start-val="0" :end-val="kpiData.tagCount" :duration="3200" />
+            </div>
+            <div class="metric-card__footer">当前可用标签维度数量</div>
+          </template>
         </div>
       </el-col>
 
       <el-col :xs="24" :sm="12" :lg="6" class="card-panel-col">
-        <div class="metric-card metric-card--cyan">
+        <div class="metric-card metric-card--cyan" :class="{ 'is-loading': loading.kpi }">
           <div class="metric-card__top">
             <span class="metric-card__label">分类总数</span>
             <div class="metric-card__icon">
               <svg-icon icon-class="tree-table" class-name="metric-card__icon-svg" />
             </div>
           </div>
-          <div class="metric-card__value">
-            <count-to :start-val="0" :end-val="kpiData.categoryCount" :duration="3600" />
-          </div>
-          <div class="metric-card__footer">用于内容归类的分类项</div>
+          <template v-if="loading.kpi">
+            <el-skeleton animated>
+              <template #template>
+                <div class="metric-card__skeleton">
+                  <el-skeleton-item variant="text" style="width: 68%; height: 36px; margin-bottom: 12px;" />
+                  <el-skeleton-item variant="text" style="width: 82%; height: 16px;" />
+                </div>
+              </template>
+            </el-skeleton>
+          </template>
+          <template v-else>
+            <div class="metric-card__value">
+              <count-to :start-val="0" :end-val="kpiData.categoryCount" :duration="3600" />
+            </div>
+            <div class="metric-card__footer">用于内容归类的分类项</div>
+          </template>
         </div>
       </el-col>
     </el-row>
@@ -93,7 +150,13 @@
             </div>
             <el-tag type="danger" effect="light" round>趋势</el-tag>
           </div>
-          <line-chart :chart-data="liuliTrendData" />
+          <div v-loading="loading.trend" class="chart-panel__body">
+            <line-chart v-if="hasTrendData" :chart-data="liuliTrendData" />
+            <div v-else class="chart-empty">
+              <div class="chart-empty__title">暂无趋势数据</div>
+              <div class="chart-empty__desc">当前时间范围内没有可展示的新增内容趋势。</div>
+            </div>
+          </div>
         </div>
       </el-col>
 
@@ -106,7 +169,13 @@
             </div>
             <el-tag type="warning" effect="light" round>分布</el-tag>
           </div>
-          <pie-chart :chart-data="categoryDistributionData" />
+          <div v-loading="loading.category" class="chart-panel__body">
+            <pie-chart v-if="hasCategoryData" :chart-data="categoryDistributionData" />
+            <div v-else class="chart-empty">
+              <div class="chart-empty__title">暂无分类分布数据</div>
+              <div class="chart-empty__desc">当前没有分类维度数据，暂时无法生成占比图表。</div>
+            </div>
+          </div>
         </div>
       </el-col>
     </el-row>
@@ -121,7 +190,13 @@
             </div>
             <el-tag type="success" effect="light" round>排行</el-tag>
           </div>
-          <bar-chart :chart-data="tagRankingData" />
+          <div v-loading="loading.tag" class="chart-panel__body">
+            <bar-chart v-if="hasTagData" :chart-data="tagRankingData" />
+            <div v-else class="chart-empty">
+              <div class="chart-empty__title">暂无标签排行数据</div>
+              <div class="chart-empty__desc">标签使用记录为空时，这里会显示排行结果。</div>
+            </div>
+          </div>
         </div>
       </el-col>
 
@@ -134,7 +209,13 @@
             </div>
             <el-tag type="info" effect="light" round>作者</el-tag>
           </div>
-          <radar-chart :chart-data="authorRankingData" />
+          <div v-loading="loading.author" class="chart-panel__body">
+            <radar-chart v-if="hasAuthorData" :chart-data="authorRankingData" />
+            <div v-else class="chart-empty">
+              <div class="chart-empty__title">暂无作者排行数据</div>
+              <div class="chart-empty__desc">作者字段为空或数据不足时，这里会显示空态提示。</div>
+            </div>
+          </div>
         </div>
       </el-col>
     </el-row>
@@ -180,43 +261,128 @@ export default {
       authorRankingData: {
         xAxisData: [],
         seriesData: []
-      }
+      },
+      loading: {
+        kpi: false,
+        trend: false,
+        category: false,
+        tag: false,
+        author: false
+      },
+      pageError: false
+    }
+  },
+  computed: {
+    hasTrendData() {
+      return this.liuliTrendData.seriesData.length > 0
+    },
+    hasCategoryData() {
+      return this.categoryDistributionData.seriesData.length > 0
+    },
+    hasTagData() {
+      return this.tagRankingData.seriesData.length > 0
+    },
+    hasAuthorData() {
+      return this.authorRankingData.seriesData.length > 0
     }
   },
   created() {
-    this.fetchKpiData()
-    this.fetchLiuliTrend()
-    this.fetchCategoryDistribution()
-    this.fetchTagRanking()
-    this.fetchAuthorRanking()
+    this.reloadAll()
   },
   methods: {
+    reloadAll() {
+      this.pageError = false
+      this.fetchKpiData()
+      this.fetchLiuliTrend()
+      this.fetchCategoryDistribution()
+      this.fetchTagRanking()
+      this.fetchAuthorRanking()
+    },
+    handleRequestError() {
+      this.pageError = true
+    },
     fetchKpiData() {
+      this.loading.kpi = true
       getKpiData().then(response => {
-        this.kpiData = response.data
+        this.kpiData = response.data || {
+          liuliCount: 0,
+          todayLiuliCount: 0,
+          tagCount: 0,
+          categoryCount: 0
+        }
+      }).catch(() => {
+        this.handleRequestError()
+      }).finally(() => {
+        this.loading.kpi = false
       })
     },
     fetchLiuliTrend() {
+      this.loading.trend = true
       getLiuliTrend().then(response => {
-        this.liuliTrendData.xAxisData = response.data.map(item => item.name)
-        this.liuliTrendData.seriesData = response.data.map(item => item.value)
+        const data = response.data || []
+        this.liuliTrendData = {
+          xAxisData: data.map(item => item.name),
+          seriesData: data.map(item => item.value)
+        }
+      }).catch(() => {
+        this.liuliTrendData = {
+          xAxisData: [],
+          seriesData: []
+        }
+        this.handleRequestError()
+      }).finally(() => {
+        this.loading.trend = false
       })
     },
     fetchCategoryDistribution() {
+      this.loading.category = true
       getCategoryDistribution().then(response => {
-        this.categoryDistributionData.seriesData = response.data
+        this.categoryDistributionData = {
+          seriesData: response.data || []
+        }
+      }).catch(() => {
+        this.categoryDistributionData = {
+          seriesData: []
+        }
+        this.handleRequestError()
+      }).finally(() => {
+        this.loading.category = false
       })
     },
     fetchTagRanking() {
+      this.loading.tag = true
       getTagRanking().then(response => {
-        this.tagRankingData.xAxisData = response.data.map(item => item.name).reverse()
-        this.tagRankingData.seriesData = response.data.map(item => item.value).reverse()
+        const data = response.data || []
+        this.tagRankingData = {
+          xAxisData: data.map(item => item.name).reverse(),
+          seriesData: data.map(item => item.value).reverse()
+        }
+      }).catch(() => {
+        this.tagRankingData = {
+          xAxisData: [],
+          seriesData: []
+        }
+        this.handleRequestError()
+      }).finally(() => {
+        this.loading.tag = false
       })
     },
     fetchAuthorRanking() {
+      this.loading.author = true
       getAuthorRanking().then(response => {
-        this.authorRankingData.xAxisData = response.data.map(item => item.name)
-        this.authorRankingData.seriesData = response.data.map(item => item.value)
+        const data = response.data || []
+        this.authorRankingData = {
+          xAxisData: data.map(item => item.name),
+          seriesData: data.map(item => item.value)
+        }
+      }).catch(() => {
+        this.authorRankingData = {
+          xAxisData: [],
+          seriesData: []
+        }
+        this.handleRequestError()
+      }).finally(() => {
+        this.loading.author = false
       })
     }
   }
@@ -306,6 +472,51 @@ export default {
   color: #fff;
 }
 
+.page-status {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 16px 18px;
+  border: 1px solid #fde2e2;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #fff6f6 0%, #fff 100%);
+}
+
+.page-status--error {
+  box-shadow: 0 10px 24px rgba(239, 68, 68, 0.08);
+}
+
+.page-status__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #ef4444;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.page-status__content {
+  flex: 1;
+}
+
+.page-status__title {
+  margin-bottom: 4px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #7f1d1d;
+}
+
+.page-status__desc {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #b45309;
+}
+
 .panel-group {
   margin-bottom: 4px;
 }
@@ -328,6 +539,10 @@ export default {
 .metric-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 14px 32px rgba(15, 23, 42, 0.09);
+}
+
+.metric-card.is-loading:hover {
+  transform: none;
 }
 
 .metric-card__top {
@@ -369,6 +584,10 @@ export default {
   font-size: 12px;
   line-height: 1.6;
   color: #8a94a6;
+}
+
+.metric-card__skeleton {
+  padding-top: 6px;
 }
 
 .metric-card--blue .metric-card__icon {
@@ -431,6 +650,38 @@ export default {
   color: #8a94a6;
 }
 
+.chart-panel__body {
+  position: relative;
+  min-height: 360px;
+}
+
+.chart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 360px;
+  padding: 24px;
+  border: 1px dashed #dbe4f0;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #f9fbff 0%, #f5f8fd 100%);
+  text-align: center;
+}
+
+.chart-empty__title {
+  margin-bottom: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.chart-empty__desc {
+  max-width: 280px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #8a94a6;
+}
+
 :deep(.el-tag) {
   border: none;
 }
@@ -469,6 +720,11 @@ export default {
     grid-template-columns: 1fr;
   }
 
+  .page-status {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
   .metric-card {
     min-height: 136px;
     padding: 18px;
@@ -487,6 +743,10 @@ export default {
     flex-direction: column;
     align-items: flex-start;
   }
+
+  .chart-panel__body,
+  .chart-empty {
+    min-height: 320px;
+  }
 }
 </style>
-
